@@ -1732,32 +1732,38 @@
     }
 
     // ---- Save & confirm order ----
-    function saveOrder(method) {
+    async function saveOrder(method) {
       if (currentOType === 'delivery' && !validateAddress()) return;
 
       const addr  = currentOType === 'delivery' ? getAddress() : null;
       const items = Object.values(cart).map(({ item, qty }) => ({
         name: item.name, emoji: item.emoji, price: item.price, qty,
       }));
-      const subtotal  = items.reduce((s, i) => s + i.price * i.qty, 0);
-      const prefix    = method === 'qr' ? 'QR' : 'COD';
-      const orderId   = prefix + '-' + Date.now();
+      const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
 
-      const order = {
-        id: orderId, items, subtotal,
-        paymentMethod: method,
-        orderType: currentOType,   // 'delivery' | 'stall'
-        address: addr,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
+      let orderId;
       try {
-        const existing = JSON.parse(localStorage.getItem('chaat_orders') || '[]');
-        existing.push(order);
-        localStorage.setItem('chaat_orders', JSON.stringify(existing));
-      } catch(e) {}
+        const res = await fetch('/api/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items, subtotal, paymentMethod: method, orderType: currentOType, address: addr }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Server error');
+        orderId = data.order.id;
+
+        // Also save to localStorage so order history screen works
+        try {
+          const existing = JSON.parse(localStorage.getItem('chaat_orders') || '[]');
+          existing.push(data.order);
+          localStorage.setItem('chaat_orders', JSON.stringify(existing));
+        } catch(e) {}
+
+      } catch(err) {
+        console.error('Order failed:', err);
+        showToast('⚠️ Could not place order. Check your connection.');
+        return;
+      }
 
       closePaymentModal();
       showConfirmation(orderId, method);
