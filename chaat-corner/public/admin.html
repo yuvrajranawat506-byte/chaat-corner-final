@@ -657,9 +657,16 @@
       const pwd = document.getElementById('login-pwd').value.trim();
       if (!pwd) return;
 
-      // Local password check — change 'admin123' to your own password
-      const ADMIN_PWD = 'admin123';
-      if (pwd !== ADMIN_PWD) {
+      // Verify password against server
+      try {
+        const res = await fetch('/api/admin/orders?status=pending', {
+          headers: { 'x-admin-password': pwd }
+        });
+        if (!res.ok) {
+          document.getElementById('login-error').style.display = 'block';
+          return;
+        }
+      } catch(e) {
         document.getElementById('login-error').style.display = 'block';
         return;
       }
@@ -734,12 +741,15 @@
     }
 
     /* ============================================
-       FETCH ORDERS — reads from localStorage
+       FETCH ORDERS — reads from server API
     ============================================ */
     async function fetchOrders() {
       try {
-        const raw    = localStorage.getItem('chaat_orders') || '[]';
-        const orders = JSON.parse(raw).reverse(); // newest first
+        const res    = await fetch('/api/admin/orders', {
+          headers: { 'x-admin-password': adminPassword }
+        });
+        if (!res.ok) return;
+        const orders = await res.json();
 
         // Detect new orders and alert
         if (lastOrderCount !== -1 && orders.length > lastOrderCount) {
@@ -842,22 +852,25 @@
     }
 
     /* ============================================
-       HANDLE STATUS ACTIONS — localStorage
+       HANDLE STATUS ACTIONS — server API
     ============================================ */
-    function handleAction(action, orderId) {
+    async function handleAction(action, orderId) {
       try {
-        const orders = JSON.parse(localStorage.getItem('chaat_orders') || '[]');
         if (action === 'delete') {
           if (!confirm(`Delete order ${orderId}?`)) return;
-          const updated = orders.filter(o => o.id !== orderId);
-          localStorage.setItem('chaat_orders', JSON.stringify(updated));
+          await fetch(`/api/admin/orders/${orderId}`, {
+            method: 'DELETE',
+            headers: { 'x-admin-password': adminPassword }
+          });
         } else {
-          const idx = orders.findIndex(o => o.id === orderId);
-          if (idx !== -1) {
-            orders[idx].status    = action;
-            orders[idx].updatedAt = new Date().toISOString();
-            localStorage.setItem('chaat_orders', JSON.stringify(orders));
-          }
+          await fetch(`/api/admin/orders/${orderId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-admin-password': adminPassword
+            },
+            body: JSON.stringify({ status: action })
+          });
         }
         fetchData();
       } catch (err) {
