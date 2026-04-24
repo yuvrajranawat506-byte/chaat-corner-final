@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: chaat-corner
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_PASSWORD
+        generateValue: true   # Render will auto-generate a secure password
+                              # Check Render dashboard → Environment to see it

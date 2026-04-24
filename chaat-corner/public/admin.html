@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Chaat Corner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --orange: #FF6B00;
+      --yellow: #FFD700;
+      --red:    #E8002D;
+      --green:  #16a34a;
+      --blue:   #2563eb;
+      --purple: #7c3aed;
+      --dark:   #0f0a00;
+      --bg:     #0f0f0f;
+      --card:   #1a1a1a;
+      --border: #2a2a2a;
+      --text:   #f0e8dc;
+      --muted:  #888;
+      --font:   'Poppins', sans-serif;
+      --radius: 14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ========================
+       LOGIN SCREEN
+    ======================== */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    #login-screen.hidden { display: none; }
+
+    .login-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      width: 340px;
+      text-align: center;
+    }
+
+    .login-logo {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--orange);
+      margin-bottom: 6px;
+    }
+
+    .login-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #111;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.95rem;
+      margin-bottom: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .login-input:focus { border-color: var(--orange); }
+
+    .login-btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .login-btn:hover { opacity: 0.88; }
+
+    .login-error {
+      color: var(--red);
+      font-size: 0.82rem;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* ========================
+       MAIN LAYOUT
+    ======================== */
+    #app { display: none; }
+    #app.visible { display: block; }
+
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+
+    .header-logo { font-size: 1.3rem; font-weight: 900; color: var(--orange); }
+
+    .header-badge {
+      background: rgba(255,107,0,0.15);
+      border: 1px solid var(--orange);
+      color: var(--orange);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 16px; }
+
+    .refresh-indicator {
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .refresh-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+    main { padding: 28px 32px; max-width: 1300px; margin: 0 auto; }
+
+    /* ========================
+       STATS GRID
+    ======================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+
+    .stat-card:hover { border-color: var(--orange); }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-sub { font-size: 0.75rem; color: var(--muted); }
+
+    .stat-orange { color: var(--orange); }
+    .stat-red    { color: var(--red); }
+    .stat-green  { color: var(--green); }
+    .stat-blue   { color: var(--blue); }
+    .stat-purple { color: var(--purple); }
+    .stat-yellow { color: var(--yellow); }
+
+    /* ========================
+       FILTER TABS
+    ======================== */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-btn {
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filter-btn.active {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #fff;
+    }
+
+    .filter-btn:not(.active):hover { border-color: var(--orange); color: var(--orange); }
+
+    .filter-count {
+      display: inline-block;
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-size: 0.72rem;
+      margin-left: 4px;
+    }
+
+    .section-title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+    }
+
+    .title-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .refresh-countdown {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+      min-width: 48px;
+      text-align: right;
+    }
+
+    .export-btn {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-family: var(--font);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .export-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .export-btn:active { transform: scale(0.97); }
+
+    /* ========================
+       ORDERS TABLE
+    ======================== */
+    .orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .order-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: start;
+      transition: border-color 0.2s;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .order-card:hover { border-color: rgba(255,107,0,0.3); }
+
+    .order-card.status-pending          { border-left: 3px solid var(--yellow); }
+    .order-card.status-preparing        { border-left: 3px solid var(--orange); }
+    .order-card.status-ready            { border-left: 3px solid var(--blue); }
+    .order-card.status-out_for_delivery { border-left: 3px solid #a78bfa; }
+    .order-card.status-delivered        { border-left: 3px solid var(--green); }
+    .order-card.status-done             { border-left: 3px solid var(--green); }
+    .order-card.status-cancelled        { border-left: 3px solid #555; opacity: 0.6; }
+
+    /* Left column */
+    .order-meta { min-width: 110px; }
+
+    .order-id {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--orange);
+      font-family: monospace;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .order-time {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .order-method {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .method-qr  { background: rgba(124,58,237,0.2); color: #a78bfa; }
+    .method-cod { background: rgba(22,163,74,0.2);  color: #4ade80; }
+
+    /* Center column */
+    .order-items { flex: 1; }
+
+    .order-items-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .item-chip {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+    }
+
+    .order-total {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--orange);
+    }
+
+    .order-address {
+      font-size: 0.78rem;
+      color: #aaa;
+      line-height: 1.6;
+      padding: 8px 0 4px;
+      border-top: 1px dashed #2a2a2a;
+      margin-top: 4px;
+    }
+    .order-address strong { color: #ddd; }
+
+    /* Right column */
+    .order-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .status-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .badge-pending          { background: rgba(255,215,0,0.15);  color: var(--yellow); }
+    .badge-preparing        { background: rgba(255,107,0,0.15);  color: var(--orange); }
+    .badge-ready            { background: rgba(37,99,235,0.15);  color: #60a5fa; }
+    .badge-out_for_delivery { background: rgba(139,92,246,0.15); color: #a78bfa; }
+    .badge-delivered        { background: rgba(22,163,74,0.15);  color: #4ade80; }
+    .badge-done             { background: rgba(22,163,74,0.15);  color: #4ade80; }
+    .badge-cancelled        { background: rgba(255,255,255,0.06); color: #666; }
+
+    .action-btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+    .action-btn {
+      font-family: var(--font);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+      white-space: nowrap;
+    }
+
+    .action-btn:hover { opacity: 0.82; transform: translateY(-1px); }
+
+    .btn-prepare  { background: rgba(255,107,0,0.15); border-color: var(--orange); color: var(--orange); }
+    .btn-ready    { background: rgba(37,99,235,0.15); border-color: #60a5fa;       color: #60a5fa; }
+    .btn-done     { background: rgba(22,163,74,0.15); border-color: var(--green);  color: #4ade80; }
+    .btn-cancel   { background: rgba(232,0,45,0.12);  border-color: var(--red);    color: var(--red); }
+    .btn-delete   { background: rgba(255,255,255,0.05); border-color: #444;        color: #666; }
+
+    .otype-delivery { background: rgba(255,107,0,0.12); border-color: var(--orange); color: var(--orange); }
+    .otype-stall    { background: rgba(22,163,74,0.12);  border-color: var(--green);  color: #4ade80; }
+
+    .status-select {
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #1e1e1e;
+      color: #fff;
+      cursor: pointer;
+      outline: none;
+    }
+    .status-select:focus { border-color: var(--orange); }
+
+    /* ========================
+       EMPTY STATE
+    ======================== */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .empty-icon { font-size: 3rem; display: block; margin-bottom: 14px; }
+
+    /* ========================
+       NEW ORDER ALERT BANNER
+    ======================== */
+    #new-order-alert {
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      background: var(--orange);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      z-index: 5000;
+      box-shadow: 0 8px 32px rgba(255,107,0,0.45);
+      transform: translateX(140%);
+      transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #new-order-alert.show { transform: translateX(0); }
+
+    /* ========================
+       RESPONSIVE
+    ======================== */
+    @media (max-width: 700px) {
+      main { padding: 20px 16px; }
+      header { padding: 14px 16px; }
+      .order-card { grid-template-columns: 1fr; }
+      .order-actions { align-items: flex-start; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <!-- ========================
+       LOGIN SCREEN
+  ======================== -->
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="login-logo">🌶️ Chaat Corner</div>
+      <div class="login-subtitle">Admin Dashboard</div>
+      <input type="password" class="login-input" id="login-pwd" placeholder="Enter admin password" />
+      <button class="login-btn" id="login-btn">Login →</button>
+      <div class="login-error" id="login-error">Wrong password. Try again.</div>
+    </div>
+  </div>
+
+  <!-- ========================
+       MAIN APP
+  ======================== -->
+  <div id="app">
+    <header>
+      <div class="header-left">
+        <div class="header-logo">🌶️ Chaat Corner</div>
+        <span class="header-badge">Admin</span>
+      </div>
+      <div class="header-right">
+        <div class="refresh-indicator">
+          <div class="refresh-dot"></div>
+          <span id="refresh-label">Live</span>
+        </div>
+        <button class="logout-btn" id="logout-btn">Logout</button>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- Stats -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Today's Orders</div>
+          <div class="stat-value stat-orange" id="stat-today">—</div>
+          <div class="stat-sub">orders placed today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-value stat-green" id="stat-revenue">—</div>
+          <div class="stat-sub">all time earnings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value stat-yellow" id="stat-pending">—</div>
+          <div class="stat-sub">waiting to prepare</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Preparing</div>
+          <div class="stat-value stat-orange" id="stat-preparing">—</div>
+          <div class="stat-sub">being cooked now</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Ready</div>
+          <div class="stat-value stat-blue" id="stat-ready">—</div>
+          <div class="stat-sub">ready for pickup</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Out for Delivery</div>
+          <div class="stat-value stat-purple" id="stat-out_for_delivery">—</div>
+          <div class="stat-sub">on the way</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Delivered</div>
+          <div class="stat-value stat-green" id="stat-delivered">—</div>
+          <div class="stat-sub">orders delivered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value stat-purple" id="stat-done">—</div>
+          <div class="stat-sub">eat-at-stall done</div>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">All <span class="filter-count" id="fc-all">0</span></button>
+        <button class="filter-btn" data-filter="pending">🕐 Pending <span class="filter-count" id="fc-pending">0</span></button>
+        <button class="filter-btn" data-filter="preparing">🔥 Preparing <span class="filter-count" id="fc-preparing">0</span></button>
+        <button class="filter-btn" data-filter="ready">🛎️ Ready <span class="filter-count" id="fc-ready">0</span></button>
+        <button class="filter-btn" data-filter="out_for_delivery">🚚 Out for Delivery <span class="filter-count" id="fc-out_for_delivery">0</span></button>
+        <button class="filter-btn" data-filter="delivered">📦 Delivered <span class="filter-count" id="fc-delivered">0</span></button>
+        <button class="filter-btn" data-filter="done">✅ Done <span class="filter-count" id="fc-done">0</span></button>
+        <button class="filter-btn" data-filter="cancelled">❌ Cancelled <span class="filter-count" id="fc-cancelled">0</span></button>
+      </div>
+
+      <div class="section-title-bar">
+        <div class="section-title" id="section-title">All Orders</div>
+        <div class="title-bar-right">
+          <span class="refresh-countdown" id="refresh-countdown">🔄 5s</span>
+          <button class="export-btn" id="export-btn">📥 Export Excel</button>
+        </div>
+      </div>
+
+      <div class="orders-list" id="orders-list">
+        <div class="empty-state">
+          <span class="empty-icon">📋</span>
+          Loading orders...
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- New order alert -->
+  <div id="new-order-alert">🔔 New order received!</div>
+
+  <script>
+    /* ============================================
+       STATE
+    ============================================ */
+    let adminPassword  = '';
+    let allOrders      = [];
+    let currentFilter  = 'all';
+    let lastOrderCount = -1;
+    let pollTimer      = null;
+
+    /* ============================================
+       LOGIN
+    ============================================ */
+    document.getElementById('login-btn').addEventListener('click', attemptLogin);
+    document.getElementById('login-pwd').addEventListener('keydown', e => {
+      if (e.key === 'Enter') attemptLogin();
+    });
+
+    async function attemptLogin() {
+      const pwd = document.getElementById('login-pwd').value.trim();
+      if (!pwd) return;
+
+      // Local password check — change 'admin123' to your own password
+      const ADMIN_PWD = 'admin123';
+      if (pwd !== ADMIN_PWD) {
+        document.getElementById('login-error').style.display = 'block';
+        return;
+      }
+
+      adminPassword = pwd;
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app').classList.add('visible');
+      startPolling();
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      adminPassword = '';
+      clearInterval(pollTimer);
+      clearInterval(countdownTimer);
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('app').classList.remove('visible');
+      document.getElementById('login-pwd').value = '';
+    });
+
+    /* ============================================
+       POLLING — refresh every 5 seconds
+    ============================================ */
+    let countdownTimer = null;
+    let countdownVal   = 5;
+
+    function startPolling() {
+      fetchData();
+      pollTimer = setInterval(() => {
+        fetchData();
+        countdownVal = 5;
+      }, 5000);
+
+      // Live countdown display
+      countdownTimer = setInterval(() => {
+        countdownVal = Math.max(0, countdownVal - 1);
+        const el = document.getElementById('refresh-countdown');
+        if (el) el.textContent = `🔄 ${countdownVal}s`;
+        if (countdownVal === 0) countdownVal = 5;
+      }, 1000);
+
+      // Wire export button now that it's visible
+      const exportBtn = document.getElementById('export-btn');
+      if (exportBtn) exportBtn.addEventListener('click', exportToExcel);
+    }
+
+    async function fetchData() {
+      await Promise.all([ fetchStats(), fetchOrders() ]);
+    }
+
+    /* ============================================
+       FETCH STATS — computed from localStorage
+    ============================================ */
+    async function fetchStats() {
+      // stats are now computed in fetchOrders via updateStatsFromOrders
+    }
+
+    function updateStatsFromOrders(orders) {
+      const today = new Date().toDateString();
+      const todayOrders = orders.filter(o => new Date(o.createdAt).toDateString() === today);
+      const revenue     = todayOrders.reduce((s, o) => s + o.subtotal, 0);
+      const counts = { pending:0, preparing:0, ready:0, out_for_delivery:0, delivered:0, done:0 };
+      orders.forEach(o => { if (counts[o.status] !== undefined) counts[o.status]++; });
+
+      document.getElementById('stat-today').textContent              = todayOrders.length;
+      document.getElementById('stat-revenue').textContent            = `₹${revenue}`;
+      document.getElementById('stat-pending').textContent            = counts.pending;
+      document.getElementById('stat-preparing').textContent          = counts.preparing;
+      document.getElementById('stat-ready').textContent              = counts.ready;
+      document.getElementById('stat-out_for_delivery').textContent   = counts.out_for_delivery;
+      document.getElementById('stat-delivered').textContent          = counts.delivered;
+      document.getElementById('stat-done').textContent               = counts.done;
+    }
+
+    /* ============================================
+       FETCH ORDERS — reads from localStorage
+    ============================================ */
+    async function fetchOrders() {
+      try {
+        const raw    = localStorage.getItem('chaat_orders') || '[]';
+        const orders = JSON.parse(raw).reverse(); // newest first
+
+        // Detect new orders and alert
+        if (lastOrderCount !== -1 && orders.length > lastOrderCount) {
+          showNewOrderAlert();
+        }
+        lastOrderCount = orders.length;
+
+        allOrders = orders;
+        renderOrders();
+        updateFilterCounts();
+        updateStatsFromOrders(orders);
+
+      } catch { /* silent */ }
+    }
+
+    /* ============================================
+       RENDER ORDERS
+    ============================================ */
+    function renderOrders() {
+      const list = document.getElementById('orders-list');
+
+      const filtered = currentFilter === 'all'
+        ? allOrders
+        : allOrders.filter(o => o.status === currentFilter);
+
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-icon">🍽️</span>
+            No ${currentFilter === 'all' ? '' : currentFilter} orders yet.
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(order => buildOrderCard(order)).join('');
+
+      // Attach action button listeners
+      list.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const { action, orderId } = btn.dataset;
+          handleAction(action, orderId);
+        });
+      });
+    }
+
+    function buildOrderCard(order) {
+      const timeStr = formatTime(order.createdAt);
+      const methodClass = order.paymentMethod === 'cod' ? 'method-cod' : 'method-qr';
+      const methodLabel = order.paymentMethod === 'cod' ? '💵 COD' : '📱 QR/UPI';
+      const otypeLabel  = order.orderType === 'stall' ? '🪑 Stall' : '🚚 Delivery';
+      const otypeClass  = order.orderType === 'stall' ? 'otype-stall' : 'otype-delivery';
+
+      const itemChips = order.items.map(item =>
+        `<span class="item-chip">${item.emoji} ${item.name} ×${item.qty}</span>`
+      ).join('');
+
+      const addrHtml = order.address
+        ? `<div class="order-address">
+             📍 <strong>${order.address.name}</strong> · ${order.address.phone}<br>
+             ${order.address.street}${order.address.area ? ', ' + order.address.area : ''}
+           </div>`
+        : '';
+
+      const actionBtns = buildActionBtns(order);
+
+      return `
+        <div class="order-card status-${order.status}">
+          <div class="order-meta">
+            <div class="order-id">${order.id}</div>
+            <div class="order-time">${timeStr}</div>
+            <span class="order-method ${methodClass}">${methodLabel}</span>
+            <span class="order-method ${otypeClass}">${otypeLabel}</span>
+          </div>
+          <div class="order-items">
+            <div class="order-items-list">${itemChips}</div>
+            <div class="order-total">₹${order.subtotal}</div>
+          </div>
+          ${addrHtml}
+          <div class="order-actions">
+            <span class="status-badge badge-${order.status}">${order.status}</span>
+            <div class="action-btns">${actionBtns}</div>
+          </div>
+        </div>`;
+    }
+
+    function buildActionBtns(order) {
+      const id = order.id;
+      const statuses = ['pending','preparing','ready','out_for_delivery','delivered','done','cancelled'];
+
+      const opts = statuses.map(s =>
+        `<option value="${s}" ${order.status === s ? 'selected' : ''}>${capitalize(s.replace(/_/g,' '))}</option>`
+      ).join('');
+
+      return `
+        <select class="status-select" data-order-id="${id}" onchange="handleAction(this.value,'${id}')">
+          ${opts}
+        </select>
+        <button class="action-btn btn-delete" data-action="delete" data-order-id="${id}">🗑 Delete</button>
+      `;
+    }
+
+    /* ============================================
+       HANDLE STATUS ACTIONS — localStorage
+    ============================================ */
+    function handleAction(action, orderId) {
+      try {
+        const orders = JSON.parse(localStorage.getItem('chaat_orders') || '[]');
+        if (action === 'delete') {
+          if (!confirm(`Delete order ${orderId}?`)) return;
+          const updated = orders.filter(o => o.id !== orderId);
+          localStorage.setItem('chaat_orders', JSON.stringify(updated));
+        } else {
+          const idx = orders.findIndex(o => o.id === orderId);
+          if (idx !== -1) {
+            orders[idx].status    = action;
+            orders[idx].updatedAt = new Date().toISOString();
+            localStorage.setItem('chaat_orders', JSON.stringify(orders));
+          }
+        }
+        fetchData();
+      } catch (err) {
+        alert('Error updating order.');
+      }
+    }
+
+    /* ============================================
+       FILTER BUTTONS
+    ============================================ */
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        document.getElementById('section-title').textContent =
+          currentFilter === 'all' ? 'All Orders' : `${capitalize(currentFilter)} Orders`;
+        renderOrders();
+      });
+    });
+
+    function updateFilterCounts() {
+      const counts = { all: allOrders.length, pending:0, preparing:0, ready:0, out_for_delivery:0, delivered:0, done:0, cancelled:0 };
+      allOrders.forEach(o => { if (counts[o.status] !== undefined) counts[o.status]++; });
+      Object.keys(counts).forEach(k => {
+        const el = document.getElementById(`fc-${k}`);
+        if (el) el.textContent = counts[k];
+      });
+    }
+
+    /* ============================================
+       NEW ORDER ALERT
+    ============================================ */
+    function showNewOrderAlert() {
+      const el = document.getElementById('new-order-alert');
+      el.classList.add('show');
+      // Try playing a beep
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+      } catch {}
+      setTimeout(() => el.classList.remove('show'), 3500);
+    }
+
+    /* ============================================
+       HELPERS
+    ============================================ */
+    function formatTime(iso) {
+      const d = new Date(iso);
+      const now = new Date();
+      const diffMs = now - d;
+      const diffMin = Math.floor(diffMs / 60000);
+
+      if (diffMin < 1)  return 'just now';
+      if (diffMin < 60) return `${diffMin}m ago`;
+
+      const diffH = Math.floor(diffMin / 60);
+      if (diffH < 24) return `${diffH}h ago`;
+
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    }
+
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    /* ============================================
+       EXPORT TO EXCEL — SheetJS (client-side)
+    ============================================ */
+    function exportToExcel() {
+      const orders = JSON.parse(localStorage.getItem('chaat_orders') || '[]');
+      if (orders.length === 0) {
+        alert('No orders to export.');
+        return;
+      }
+
+      const wb = XLSX.utils.book_new();
+
+      const headerStyle = {
+        font: { bold: true, color: { rgb: 'FFFFFF' } },
+        fill: { fgColor: { rgb: 'FF6B00' } },
+        alignment: { horizontal: 'center' }
+      };
+
+      /* ---- Sheet 1: Orders Summary ---- */
+      const summaryRows = [
+        ['Order ID', 'Date', 'Time', 'Customer Name', 'Phone', 'Address', 'Area',
+         'Order Type', 'Items', 'Subtotal (₹)', 'Payment Method', 'Status']
+      ];
+
+      orders.forEach(o => {
+        const d    = new Date(o.createdAt);
+        const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        const itemStr = o.items.map(i => `${i.name} x${i.qty}`).join(', ');
+      summaryRows.push([
+          o.id,
+          date,
+          time,
+          o.address?.name  || '—',
+          o.address?.phone || '—',
+          o.address?.street || '—',
+          o.address?.area  || '—',
+          o.orderType === 'stall' ? 'Eat at Stall' : 'Delivery',
+          itemStr,
+          o.subtotal,
+          o.paymentMethod === 'cod' ? 'Pay on Delivery' : 'QR / UPI',
+          capitalize(o.status.replace(/_/g,' '))
+        ]);
+      });
+
+      const ws1 = XLSX.utils.aoa_to_sheet(summaryRows);
+
+      // Column widths
+      ws1['!cols'] = [
+        {wch:18}, {wch:12}, {wch:8}, {wch:18}, {wch:14},
+        {wch:28}, {wch:16}, {wch:14}, {wch:36}, {wch:14}, {wch:16}, {wch:16}
+      ];
+
+      ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1'].forEach(cell => {
+        if (ws1[cell]) ws1[cell].s = headerStyle;
+      });
+
+      XLSX.utils.book_append_sheet(wb, ws1, 'Orders');
+
+      /* ---- Sheet 2: Items Breakdown ---- */
+      const itemRows = [['Order ID', 'Date', 'Customer', 'Item Name', 'Emoji', 'Price (₹)', 'Qty', 'Line Total (₹)']];
+      orders.forEach(o => {
+        const d    = new Date(o.createdAt);
+        const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        o.items.forEach(item => {
+          itemRows.push([
+            o.id, date,
+            o.address?.name || '—',
+            item.name, item.emoji,
+            item.price, item.qty,
+            item.price * item.qty
+          ]);
+        });
+      });
+
+      const ws2 = XLSX.utils.aoa_to_sheet(itemRows);
+      ws2['!cols'] = [{wch:18},{wch:12},{wch:16},{wch:22},{wch:6},{wch:12},{wch:6},{wch:14}];
+      ['A1','B1','C1','D1','E1','F1','G1','H1'].forEach(cell => {
+        if (ws2[cell]) ws2[cell].s = headerStyle;
+      });
+      XLSX.utils.book_append_sheet(wb, ws2, 'Items Breakdown');
+
+      /* ---- Sheet 3: Revenue Summary ---- */
+      const today = new Date().toDateString();
+      const todayOrders  = orders.filter(o => new Date(o.createdAt).toDateString() === today);
+      const totalRev     = orders.reduce((s, o) => s + o.subtotal, 0);
+      const todayRev     = todayOrders.reduce((s, o) => s + o.subtotal, 0);
+      const qrOrders     = orders.filter(o => o.paymentMethod === 'qr');
+      const codOrders    = orders.filter(o => o.paymentMethod === 'cod');
+
+      const revRows = [
+        ['Metric', 'Value'],
+        ['Total Orders', orders.length],
+        ["Today's Orders", todayOrders.length],
+        ['Total Revenue (₹)', totalRev],
+        ["Today's Revenue (₹)", todayRev],
+        ['QR/UPI Orders', qrOrders.length],
+        ['Pay on Delivery Orders', codOrders.length],
+        ['Delivery Orders', orders.filter(o => o.orderType !== 'stall').length],
+        ['Eat at Stall Orders', orders.filter(o => o.orderType === 'stall').length],
+        ['Pending', orders.filter(o => o.status === 'pending').length],
+        ['Preparing', orders.filter(o => o.status === 'preparing').length],
+        ['Ready', orders.filter(o => o.status === 'ready').length],
+        ['Out for Delivery', orders.filter(o => o.status === 'out_for_delivery').length],
+        ['Delivered', orders.filter(o => o.status === 'delivered').length],
+        ['Done (Stall)', orders.filter(o => o.status === 'done').length],
+        ['Cancelled', orders.filter(o => o.status === 'cancelled').length],
+        ['Export Date', new Date().toLocaleString('en-IN')]
+      ];
+      const ws3 = XLSX.utils.aoa_to_sheet(revRows);
+      ws3['!cols'] = [{wch:24}, {wch:20}];
+      ['A1','B1'].forEach(cell => { if (ws3[cell]) ws3[cell].s = headerStyle; });
+      XLSX.utils.book_append_sheet(wb, ws3, 'Summary');
+
+      // Download
+      const timestamp = new Date().toISOString().slice(0,16).replace('T','_').replace(':','-');
+      XLSX.writeFile(wb, `ChaaatCorner_Orders_${timestamp}.xlsx`);
+    }
+  </script>
+</body>
+</html>
